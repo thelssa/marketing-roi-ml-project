@@ -5,44 +5,41 @@ import numpy as np
 def add_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
-    # Sécurité : éviter division par zéro
-    total_budget = df["tv"] + df["radio"] + df["social_media"]
+    # Calcul du budget total (somme des canaux)
+    total_budget = df[["tv", "radio", "social_media"]].sum(axis=1)
     total_budget = total_budget.replace(0, np.nan)
 
-    # 1. Budget total
-    df["total_budget"] = df["tv"] + df["radio"] + df["social_media"]
+    # Ajout du budget total au dataset
+    df["total_budget"] = total_budget
 
-    # 2. Parts de budget
+    # Calcul de la contribution de chaque canal dans le budget global
     df["tv_share"] = df["tv"] / total_budget
     df["radio_share"] = df["radio"] / total_budget
     df["social_media_share"] = df["social_media"] / total_budget
 
-    # 3. ROI / proxy marketing
+    # Calcul du ROI (retour sur investissement marketing)
     df["roi"] = df["sales"] / total_budget
 
-    # 4. Interactions entre canaux
+    # Création de variables d’interaction entre canaux marketing
     df["tv_radio"] = df["tv"] * df["radio"]
     df["tv_social"] = df["tv"] * df["social_media"]
     df["radio_social"] = df["radio"] * df["social_media"]
 
-    # 5. Ratios utiles
+    # Ratios de performance par canal (efficacité individuelle)
     df["sales_per_tv"] = df["sales"] / df["tv"].replace(0, np.nan)
     df["sales_per_radio"] = df["sales"] / df["radio"].replace(0, np.nan)
     df["sales_per_social"] = df["sales"] / df["social_media"].replace(0, np.nan)
 
-    # 6. Encodage simple du type d’influenceur
-    # On garde aussi la colonne d'origine si besoin d'analyse
+    # Encodage one-hot de la variable catégorielle "influencer" si elle existe
     if "influencer" in df.columns:
         influencer_dummies = pd.get_dummies(df["influencer"], prefix="influencer", drop_first=True)
         df = pd.concat([df, influencer_dummies], axis=1)
 
-    # Remplir les NaN créés par divisions par zéro
+    # Remplacement des NaN issus des divisions par zéro
     ratio_cols = [
         "tv_share", "radio_share", "social_media_share",
         "roi", "sales_per_tv", "sales_per_radio", "sales_per_social"
     ]
-    for col in ratio_cols:
-        if col in df.columns:
-            df[col] = df[col].fillna(0)
+    df[ratio_cols] = df[ratio_cols].fillna(0)
 
-    return
+    return df
