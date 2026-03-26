@@ -30,8 +30,7 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
     df["sales_per_radio"] = df["sales"] / df["radio"].replace(0, np.nan)
     df["sales_per_social"] = df["sales"] / df["social_media"].replace(0, np.nan)
 
-    # 6. Encodage simple du type d’influenceur
-    # On garde aussi la colonne d'origine si besoin d'analyse
+    # 6. Encodage simple du type d’influenceur:
     if "influencer" in df.columns:
         influencer_dummies = pd.get_dummies(df["influencer"], prefix="influencer", drop_first=True)
         df = pd.concat([df, influencer_dummies], axis=1)
@@ -45,4 +44,4 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
         if col in df.columns:
             df[col] = df[col].fillna(0)
 
-    return
+    return df
