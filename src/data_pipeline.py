@@ -6,7 +6,6 @@ from src.feature_engineering import add_features
 
 
 def load_data(path: str) -> pd.DataFrame:
-
     if path.endswith(".csv"):
         return pd.read_csv(path)
     elif path.endswith(".xlsx"):
@@ -15,10 +14,15 @@ def load_data(path: str) -> pd.DataFrame:
         raise ValueError("Format de fichier non supporté. Utilise un fichier .csv ou .xlsx")
 
 
-def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
     df = clean_column_names(df)
     df = fill_missing_values(df)
+    return df
+
+
+def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
+    df = clean_data(df)
     df = add_features(df)
 
     if "influencer" in df.columns:
